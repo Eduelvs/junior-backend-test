@@ -9,6 +9,7 @@ use Tests\TestCase;
 
 class CreateContactsTest extends TestCase
 {
+    use RefreshDatabase;
     #[Test]
     public function it_should_be_able_to_create_a_new_contact(): void
     {

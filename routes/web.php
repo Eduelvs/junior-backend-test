@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\CreateContactController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ContactController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('/contacts', CreateContactController::class);
+Route::resource('contacts', ContactController::class)->only([
+    'index', 'store', 'update', 'destroy'
+]);
