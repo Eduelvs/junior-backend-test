@@ -11,11 +11,13 @@ export default defineConfig({
     }),
   ],
   server: {
-    host: '0.0.0.0',
+    https: false,
+    host: 'localhost',  // ou '0.0.0.0' se quiser aceitar conexões externas na rede local
     port: 5173,
     hmr: {
-      host: 'effective-parakeet-7q6pwrg45j2xv7g-5173.app.github.dev',
-      protocol: 'wss',
+      host: 'localhost',  // importantíssimo ser o mesmo host usado no navegador
+      protocol: 'ws',
     },
+    cors: true, // libera CORS para evitar erros se backend e frontend tiverem portas diferentes
   },
 })

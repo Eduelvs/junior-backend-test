@@ -7,7 +7,7 @@ use App\Http\Controllers\ContactController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Contacts/Index'); // ou 'Home' se quiser
+    return Inertia::render('Home'); // ou 'Home' se quiser
 });
 
 
