@@ -1,21 +1,16 @@
 import './bootstrap'
 import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/inertia-vue3'
-
-// mapeia todos os arquivos .vue dentro de Pages e subpastas
-const pages = import.meta.glob('./Pages/**/*.vue')
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 
 createInertiaApp({
-  resolve: name => {
-    const page = pages[`./Pages/${name}.vue`]
-    if (!page) {
-      throw new Error(`Página não encontrada: ./Pages/${name}.vue`)
-    }
-    return page()
-  },
+  resolve: name =>
+    resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
+
   setup({ el, App, props, plugin }) {
     createApp({ render: () => h(App, props) })
       .use(plugin)
       .mount(el)
   },
+  version: () => '1.0'
 })

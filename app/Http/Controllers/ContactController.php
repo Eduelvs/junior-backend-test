@@ -1,7 +1,4 @@
 <?php
-
-// app/Http/Controllers/ContactController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
@@ -13,9 +10,10 @@ class ContactController extends Controller
     public function index()
     {
         $contacts = Contact::paginate(10);
-            return Inertia::render('Contacts/Index', [
-                'contacts' => $contacts,
-            ]);
+
+        return Inertia::render('Contacts/Index', [
+            'contacts' => $contacts,
+        ]);
     }
 
     public function store(Request $request)
@@ -30,7 +28,7 @@ class ContactController extends Controller
 
         Contact::create($data);
 
-        return response()->json(null, 200);
+        return redirect()->route('contacts.index');
     }
 
     public function update(Request $request, Contact $contact)
@@ -45,13 +43,13 @@ class ContactController extends Controller
 
         $contact->update($data);
 
-        return response()->json(null, 200);
+        return redirect()->route('contacts.index');
     }
 
     public function destroy(Contact $contact)
     {
         $contact->delete();
 
-        return response()->json(null, 200);
+        return redirect()->route('contacts.index');
     }
 }
