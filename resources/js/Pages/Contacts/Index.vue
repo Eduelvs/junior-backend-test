@@ -1,5 +1,14 @@
 <template>
   <div class="p-6 max-w-xl mx-auto">
+    <transition name="fade">
+      <div
+        v-if="notification"
+        class="fixed top-4 right-4 bg-green-100 text-green-800 border border-green-300 rounded shadow-lg px-6 py-3 z-50"
+      >
+        {{ notification }}
+      </div>
+    </transition>
+
     <h1 class="text-3xl font-bold mb-6 text-center">Contatos</h1>
 
     <form @submit.prevent="submit" class="mb-6 flex flex-col gap-4 bg-white p-6 rounded shadow">
@@ -13,17 +22,25 @@
       <li
         v-for="contact in contacts.data"
         :key="contact.id"
-        class="bg-white rounded shadow p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center"
+        class="bg-white rounded-xl shadow-md p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center hover:shadow-lg transition-shadow duration-300 border border-gray-100"
       >
         <div>
-          <p class="font-semibold text-lg">{{ contact.name }}</p>
-          <p class="text-gray-600">{{ contact.email }}</p>
-          <p class="text-gray-600">{{ contact.phone }}</p>
+          <p class="font-bold text-lg text-gray-800">{{ contact.name }}</p>
+          <p class="text-gray-500 flex items-center gap-1">
+            📧 {{ contact.email }}
+          </p>
+          <p class="text-gray-500 flex items-center gap-1">
+            📞 {{ contact.phone }}
+          </p>
         </div>
 
-        <div class="flex gap-2 mt-2 sm:mt-0">
-          <button @click="startEditing(contact)" class="btn-yellow">Editar</button>
-          <button @click="destroy(contact.id)" class="btn-red">Excluir</button>
+        <div class="flex gap-2 mt-4 sm:mt-0">
+          <button @click="startEditing(contact)" class="btn-yellow flex items-center gap-1">
+            ✏️ Editar
+          </button>
+          <button @click="destroy(contact.id)" class="btn-red flex items-center gap-1">
+            🗑️ Excluir
+          </button>
         </div>
       </li>
     </ul>
@@ -47,93 +64,18 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { reactive, ref } from 'vue'
-import { defineProps } from 'vue'
-import { Inertia } from '@inertiajs/inertia'
-
-const props = defineProps({
-  contacts: Object,
-})
-
-const form = reactive({
-  name: '',
-  email: '',
-  phone: '',
-})
-
-const editingContact = ref(false)
-const editForm = reactive({
-  id: null,
-  name: '',
-  email: '',
-  phone: '',
-})
-
-const submit = () => {
-  Inertia.post('/contacts', { ...form }, {
-    onSuccess: () => {
-      form.name = ''
-      form.email = ''
-      form.phone = ''
-      formErrors.value = {}
-    },
-    onError: (errors) => {
-      console.error('Erro ao criar contato:', errors)
-      // Aqui você pode mostrar toasts ou mensagens no formulário depois
-    }
-  })
-}
-
-const startEditing = (contact) => {
-  editingContact.value = true
-  editForm.id = contact.id
-  editForm.name = contact.name
-  editForm.email = contact.email
-  editForm.phone = contact.phone
-}
-
-const cancelEdit = () => {
-  editingContact.value = false
-  editForm.id = null
-  editForm.name = ''
-  editForm.email = ''
-  editForm.phone = ''
-}
-
-const submitEdit = () => {
-  Inertia.post(`/contacts/${editForm.id}`, {
-    ...editForm,
-    _method: 'PUT' // ou 'PATCH'
-  }, {
-    onSuccess: () => {
-      cancelEdit()
-      Inertia.visit('/contacts')
-    }
-  })
-}
-
-
-
-const destroy = (id) => {
-  if (confirm('Tem certeza que deseja excluir?')) {
-    Inertia.post(`/contacts/${id}`, {
-      _method: 'DELETE'
-    }, {
-      onSuccess: () => {
-        Inertia.visit('/contacts')
-      },
-      onError: (errors) => {
-        console.error('Erro ao excluir contato:', errors)
-      }
-    })
-  }
-}
-
-</script>
-
 <style scoped>
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 .input {
   border: 1px solid #ccc;
   padding: 0.5rem 0.75rem;
@@ -187,3 +129,105 @@ const destroy = (id) => {
   font-weight: 600;
 }
 </style>
+
+<script setup>
+import { reactive, ref } from 'vue'
+import { defineProps } from 'vue'
+import { Inertia } from '@inertiajs/inertia'
+
+
+const props = defineProps({
+  contacts: Object,
+  notification: String,
+})
+
+const notification = ref(null)
+
+const showNotification = (message) => {
+  notification.value = message
+  setTimeout(() => {
+    notification.value = null
+  }, 5000)
+}
+
+
+// Importa o watch do Vue
+import { watch } from 'vue'
+
+const form = reactive({
+  name: '',
+  email: '',
+  phone: '',
+})
+
+const editingContact = ref(false)
+const editForm = reactive({
+  id: null,
+  name: '',
+  email: '',
+  phone: '',
+})
+
+const submit = () => {
+  Inertia.post('/contacts', { ...form }, {
+    preserveState: true,
+    preserveScroll: true,
+    onSuccess: () => {
+      form.name = ''
+      form.email = ''
+      form.phone = ''
+      showNotification('Contato adicionado com sucesso!')
+    },
+    onError: (errors) => {
+      console.error('Erro ao criar contato:', errors)
+    }
+  })
+}
+
+const startEditing = (contact) => {
+  editingContact.value = true
+  editForm.id = contact.id
+  editForm.name = contact.name
+  editForm.email = contact.email
+  editForm.phone = contact.phone
+}
+
+const cancelEdit = () => {
+  editingContact.value = false
+  editForm.id = null
+  editForm.name = ''
+  editForm.email = ''
+  editForm.phone = ''
+}
+
+const submitEdit = () => {
+  Inertia.post(`/contacts/${editForm.id}`, {
+    ...editForm,
+    _method: 'PUT' // ou 'PATCH'
+  }, {
+    onSuccess: () => {
+      cancelEdit()
+      showNotification('Contato atualizado com sucesso!')
+    }
+  })
+}
+
+
+
+const destroy = (id) => {
+  if (confirm('Tem certeza que deseja excluir?')) {
+    Inertia.post(`/contacts/${id}`, {
+      _method: 'DELETE'
+    }, {
+      onSuccess: () => {
+        showNotification('Contato excluído com sucesso!')
+      },
+      onError: (errors) => {
+        console.error('Erro ao excluir contato:', errors)
+      }
+    })
+  }
+}
+
+</script>
+

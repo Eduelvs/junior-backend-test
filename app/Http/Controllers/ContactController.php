@@ -13,6 +13,7 @@ class ContactController extends Controller
 
         return Inertia::render('Contacts/Index', [
             'contacts' => $contacts,
+            'notification' => session('notification'),
         ]);
     }
 
@@ -48,7 +49,11 @@ class ContactController extends Controller
 
     public function destroy(Contact $contact)
     {
+        $contactName = $contact->name;
         $contact->delete();
+
+        // Adiciona notificação de sessão (flash) para o frontend
+        session()->flash('notification', "Contato '{$contactName}' excluído com sucesso.");
 
         return redirect()->route('contacts.index');
     }

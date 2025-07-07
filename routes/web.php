@@ -7,7 +7,11 @@ use App\Http\Controllers\ContactController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Home'); // ou 'Home' se quiser
+    //return Inertia::render('Home'); // ou 'Home' se quiser
+    //return redirect()->route('contacts.index');
+     return Inertia::render('Contacts/Index', [
+        'contacts' => \App\Models\Contact::paginate(10),
+    ]);
 });
 
 
